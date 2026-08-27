@@ -1,0 +1,5 @@
+/vakt
+/vakt.exe
+/data/
+*.db
+*.db-*
