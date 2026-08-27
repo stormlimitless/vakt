@@ -1,0 +1,30 @@
+{{template "head" .}}
+<main class="mx-auto max-w-sm px-6 py-24">
+  <p class="text-xs uppercase tracking-widest text-stone-500">Protected by Vakt</p>
+  <h1 class="mt-2 text-2xl font-semibold">{{.Host}}</h1>
+  {{if .Error}}<p class="mt-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{{.Error}}</p>{{end}}
+  <form method="post" action="/vakt/login" class="mt-8 space-y-6">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <input type="hidden" name="next" value="{{.Next}}">
+    {{range .Methods}}
+      {{if eq . "pin"}}
+      <label class="block"><span class="text-sm font-medium">PIN code</span>
+        <input name="pin" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" class="mt-1 w-full rounded border border-stone-300 px-3 py-2 text-lg tracking-[0.4em]"></label>
+      {{else if eq . "password"}}
+      <label class="block"><span class="text-sm font-medium">Password</span>
+        <input name="password" type="password" autocomplete="current-password" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
+      {{else if eq . "users"}}
+      <fieldset class="space-y-3">
+        <label class="block"><span class="text-sm font-medium">Username</span>
+          <input name="username" autocomplete="username" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
+        <label class="block"><span class="text-sm font-medium">Password</span>
+          <input name="user_password" type="password" autocomplete="current-password" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
+        <label class="block"><span class="text-sm font-medium">Authenticator code <span class="text-stone-500">(if enabled)</span></span>
+          <input name="totp" inputmode="numeric" autocomplete="one-time-code" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
+      </fieldset>
+      {{end}}
+    {{end}}
+    <button class="w-full rounded bg-stone-900 px-4 py-2 font-medium text-white hover:bg-stone-700">Continue</button>
+  </form>
+</main>
+{{template "foot" .}}
