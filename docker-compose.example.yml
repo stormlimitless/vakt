@@ -1,0 +1,8 @@
+services:
+  vakt:
+    image: ghcr.io/stormlimitless/vakt:latest
+    ports: ["80:80", "443:443"]
+    volumes: ["./data:/data"]
+    environment:
+      VAKT_ADMIN_HOST: vakt.example.com
+    restart: unless-stopped

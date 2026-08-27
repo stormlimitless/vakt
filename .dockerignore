@@ -1,0 +1,6 @@
+data/
+docs/
+.git/
+Documentation/
+README.md
+*.exe

@@ -1,0 +1,24 @@
+admin_host: vakt.example.com
+data_dir: /data
+listen_http: ":80"
+listen_https: ":443"
+
+tls:
+  mode: autocert
+  email: you@example.com
+
+# CIDRs whose X-Forwarded-For header Vakt should trust (e.g. your load balancer).
+trusted_proxies: []
+
+lockout:
+  max_attempts: 5
+  minutes: 15
+
+sites:
+  - host: app.example.com
+    upstream: http://app:3000
+    methods: [pin, users]
+    pin: "482913"
+    allowlist: ["192.168.1.0/24"]
+    session_ttl: 168h   # Go duration
+    require_totp: false
