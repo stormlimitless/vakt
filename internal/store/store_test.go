@@ -49,6 +49,13 @@ func TestSiteRoundTrip(t *testing.T) {
 	if _, err := s.SiteByHost("nope"); err != sql.ErrNoRows {
 		t.Fatalf("want ErrNoRows, got %v", err)
 	}
+	site.Host = "renamed.example.com"
+	if err := s.UpdateSite(site); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := s.SiteByID(site.ID); err != nil || got.Host != "renamed.example.com" {
+		t.Fatalf("update by id failed: %+v %v", got, err)
+	}
 	u := &store.User{Username: "x", PasswordHash: "h", Role: "member"}
 	s.CreateUser(u)
 	s.SetSiteUsers(site.ID, []int64{u.ID})

@@ -1,0 +1,22 @@
+{{template "admin_head" .}}
+<h1 class="text-2xl font-semibold">Status</h1>
+<p class="mt-1 text-sm text-stone-500">Vakt {{.Version}}</p>
+
+<h2 class="mt-8 font-medium">Active sessions</h2>
+<table class="mt-2 w-full text-sm">
+  <tbody>
+  <tr class="border-t border-stone-200"><td class="py-2">Admin</td><td>{{index .Counts 0}}</td></tr>
+  {{range .Sites}}<tr class="border-t border-stone-200"><td class="py-2">{{.Host}}</td><td>{{index $.Counts .ID}}</td></tr>{{end}}
+  </tbody>
+</table>
+
+<h2 class="mt-8 font-medium">Current lockouts</h2>
+<table class="mt-2 w-full text-sm">
+  <thead class="text-left text-stone-500"><tr><th class="py-2">Site</th><th>IP</th><th>Attempts</th><th>Until</th></tr></thead>
+  <tbody>
+  {{range .Locked}}
+  <tr class="border-t border-stone-200"><td class="py-2">{{index $.Hosts .SiteID}}</td><td class="font-mono">{{.IP}}</td><td>{{.Count}}</td><td>{{.LockedUntil.UTC.Format "2006-01-02 15:04 UTC"}}</td></tr>
+  {{else}}<tr><td colspan="4" class="py-4 text-stone-500">None.</td></tr>{{end}}
+  </tbody>
+</table>
+{{template "admin_foot" .}}

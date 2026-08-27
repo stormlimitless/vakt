@@ -1,0 +1,13 @@
+{{template "admin_head" .}}
+<div class="mx-auto max-w-sm">
+  <p class="text-xs uppercase tracking-widest text-stone-500">Vakt</p>
+  <h1 class="mt-2 text-2xl font-semibold">Create the first admin</h1>
+  <form method="post" action="/admin/setup" class="mt-8 space-y-4">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <input type="hidden" name="token" value="{{.Token}}">
+    <label class="block"><span class="text-sm font-medium">Username</span><input name="username" autocomplete="username" required class="{{template "input"}}"></label>
+    <label class="block"><span class="text-sm font-medium">Password</span><input name="password" type="password" autocomplete="new-password" minlength="8" required class="{{template "input"}}"></label>
+    <button class="w-full {{template "btn"}}">Create admin</button>
+  </form>
+</div>
+{{template "admin_foot" .}}

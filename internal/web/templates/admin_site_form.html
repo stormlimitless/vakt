@@ -1,0 +1,47 @@
+{{template "admin_head" .}}
+<h1 class="text-2xl font-semibold">{{if .Site.ID}}{{.Site.Host}}{{else}}New site{{end}}</h1>
+<form method="post" class="mt-8 max-w-lg space-y-6">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <label class="block"><span class="text-sm font-medium">Host</span><input name="host" value="{{.Site.Host}}" placeholder="app.example.com" required class="{{template "input"}}"></label>
+  <label class="block"><span class="text-sm font-medium">Upstream</span><input name="upstream" value="{{.Site.Upstream}}" placeholder="http://app:3000" required class="{{template "input"}}"></label>
+
+  <fieldset class="space-y-2">
+    <legend class="text-sm font-medium">Login methods</legend>
+    <label class="flex items-center gap-2"><input type="checkbox" name="methods" value="pin" {{if .Site.Has "pin"}}checked{{end}}> PIN code</label>
+    <label class="flex items-center gap-2"><input type="checkbox" name="methods" value="password" {{if .Site.Has "password"}}checked{{end}}> Shared password</label>
+    <label class="flex items-center gap-2"><input type="checkbox" name="methods" value="users" {{if .Site.Has "users"}}checked{{end}}> Named users</label>
+  </fieldset>
+
+  <label class="block"><span class="text-sm font-medium">PIN code</span>
+    <input name="pin" inputmode="numeric" pattern="[0-9]{4,12}" autocomplete="off" class="{{template "input"}}">
+    {{if .Site.PinHash}}<span class="mt-1 block text-xs text-stone-500">A PIN is set. Leave blank to keep it.</span>
+    <label class="mt-1 flex items-center gap-2 text-xs"><input type="checkbox" name="clear_pin"> Remove the PIN</label>{{end}}
+  </label>
+  <label class="block"><span class="text-sm font-medium">Shared password</span>
+    <input name="password" type="password" autocomplete="new-password" class="{{template "input"}}">
+    {{if .Site.PasswordHash}}<span class="mt-1 block text-xs text-stone-500">A password is set. Leave blank to keep it.</span>
+    <label class="mt-1 flex items-center gap-2 text-xs"><input type="checkbox" name="clear_password"> Remove the password</label>{{end}}
+  </label>
+
+  <label class="block"><span class="text-sm font-medium">Session length (hours)</span><input name="session_ttl_hours" type="number" min="1" value="{{.TTLHours}}" class="{{template "input"}}"></label>
+  <label class="block"><span class="text-sm font-medium">IP allowlist <span class="text-stone-500">(one CIDR per line, skips login)</span></span><textarea name="allowlist" rows="3" class="{{template "input"}} font-mono text-sm">{{.AllowlistText}}</textarea></label>
+  <label class="flex items-center gap-2"><input type="checkbox" name="require_totp" {{if .Site.RequireTOTP}}checked{{end}}> Require an authenticator code for named users</label>
+
+  {{if .Users}}
+  <fieldset class="space-y-2">
+    <legend class="text-sm font-medium">Users allowed on this site</legend>
+    {{range .Users}}<label class="flex items-center gap-2"><input type="checkbox" name="users" value="{{.ID}}" {{if index $.Assigned .ID}}checked{{end}}> {{.Username}}</label>{{end}}
+  </fieldset>
+  {{end}}
+
+  <div class="flex gap-3"><button class="{{template "btn"}}">Save</button><a href="/admin/sites" class="{{template "btn_secondary"}}">Cancel</a></div>
+</form>
+
+{{if .Site.ID}}
+<form method="post" action="/admin/sites/{{.Site.ID}}/delete" class="mt-12 max-w-lg border-t border-stone-200 pt-6">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="confirm"> Remove this site and all of its sessions</label>
+  <button class="mt-3 rounded border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50">Delete site</button>
+</form>
+{{end}}
+{{template "admin_foot" .}}

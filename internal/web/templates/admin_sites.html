@@ -1,0 +1,19 @@
+{{template "admin_head" .}}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Sites</h1>
+  <a href="/admin/sites/new" class="{{template "btn"}}">Add site</a>
+</div>
+<table class="mt-6 w-full text-sm">
+  <thead class="text-left text-stone-500"><tr><th class="py-2">Host</th><th>Upstream</th><th>Methods</th><th>Sessions</th></tr></thead>
+  <tbody>
+  {{range .Sites}}
+  <tr class="border-t border-stone-200">
+    <td class="py-2"><a href="/admin/sites/{{.ID}}" class="font-medium underline">{{.Host}}</a></td>
+    <td class="text-stone-600">{{.Upstream}}</td>
+    <td>{{range .Methods}}<span class="mr-1 rounded bg-stone-200 px-1.5 py-0.5 text-xs">{{.}}</span>{{end}}</td>
+    <td>{{index $.Counts .ID}}</td>
+  </tr>
+  {{else}}<tr><td colspan="4" class="py-6 text-stone-500">No sites yet.</td></tr>{{end}}
+  </tbody>
+</table>
+{{template "admin_foot" .}}

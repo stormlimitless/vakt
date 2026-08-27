@@ -1,0 +1,18 @@
+{{template "admin_head" .}}
+<div class="flex items-center justify-between">
+  <h1 class="text-2xl font-semibold">Users</h1>
+  <a href="/admin/users/new" class="{{template "btn"}}">Add user</a>
+</div>
+<table class="mt-6 w-full text-sm">
+  <thead class="text-left text-stone-500"><tr><th class="py-2">Username</th><th>Role</th><th>Authenticator</th></tr></thead>
+  <tbody>
+  {{range .Users}}
+  <tr class="border-t border-stone-200">
+    <td class="py-2"><a href="/admin/users/{{.ID}}" class="font-medium underline">{{.Username}}</a></td>
+    <td>{{.Role}}</td>
+    <td>{{if .TOTP}}enabled{{else}}<span class="text-stone-500">off</span>{{end}}</td>
+  </tr>
+  {{else}}<tr><td colspan="3" class="py-6 text-stone-500">No users yet.</td></tr>{{end}}
+  </tbody>
+</table>
+{{template "admin_foot" .}}

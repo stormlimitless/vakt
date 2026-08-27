@@ -72,6 +72,17 @@ func (s *Store) UpsertSite(site *Site) error {
 	return s.db.QueryRow(`SELECT id FROM sites WHERE host=?`, site.Host).Scan(&site.ID)
 }
 
+func (s *Store) UpdateSite(site *Site) error {
+	allow := []byte("[]")
+	if len(site.Allowlist) > 0 {
+		allow, _ = json.Marshal(site.Allowlist)
+	}
+	_, err := s.db.Exec(`UPDATE sites SET host=?, upstream=?, methods=?, pin_hash=?, password_hash=?, session_ttl_seconds=?, allowlist=?, require_totp=?, updated_at=? WHERE id=?`,
+		site.Host, site.Upstream, strings.Join(site.Methods, ","), nullIfEmpty(site.PinHash), nullIfEmpty(site.PasswordHash),
+		int64(site.SessionTTL.Seconds()), string(allow), site.RequireTOTP, time.Now().Unix(), site.ID)
+	return err
+}
+
 func (s *Store) SiteByHost(host string) (*Site, error) {
 	return scanSite(s.db.QueryRow(`SELECT `+siteCols+` FROM sites WHERE host=?`, host))
 }

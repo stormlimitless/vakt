@@ -1,0 +1,38 @@
+{{template "admin_head" .}}
+<h1 class="text-2xl font-semibold">{{if .U.ID}}{{.U.Username}}{{else}}New user{{end}}</h1>
+<form method="post" class="mt-8 max-w-lg space-y-6">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <label class="block"><span class="text-sm font-medium">Username</span><input name="username" value="{{.U.Username}}" autocomplete="off" required class="{{template "input"}}"></label>
+  <label class="block"><span class="text-sm font-medium">Password{{if .U.ID}} <span class="text-stone-500">(leave blank to keep)</span>{{end}}</span><input name="password" type="password" autocomplete="new-password" minlength="8" {{if not .U.ID}}required{{end}} class="{{template "input"}}"></label>
+  <label class="block"><span class="text-sm font-medium">Role</span>
+    <select name="role" class="{{template "input"}}">
+      <option value="member" {{if eq .U.Role "member"}}selected{{end}}>Member</option>
+      <option value="admin" {{if eq .U.Role "admin"}}selected{{end}}>Admin</option>
+    </select></label>
+  {{if .Sites}}
+  <fieldset class="space-y-2">
+    <legend class="text-sm font-medium">Sites this user may open</legend>
+    {{range .Sites}}<label class="flex items-center gap-2"><input type="checkbox" name="sites" value="{{.ID}}" {{if index $.Assigned .ID}}checked{{end}}> {{.Host}}</label>{{end}}
+  </fieldset>
+  {{end}}
+  <div class="flex gap-3"><button class="{{template "btn"}}">Save</button><a href="/admin/users" class="{{template "btn_secondary"}}">Cancel</a></div>
+</form>
+
+{{if .U.ID}}
+<section class="mt-12 max-w-lg border-t border-stone-200 pt-6">
+  <h2 class="font-medium">Authenticator app</h2>
+  {{if .Enrolled}}
+  <p class="mt-1 text-sm text-stone-600">Enabled. Resetting removes it until the user enrols again.</p>
+  <form method="post" action="/admin/users/{{.U.ID}}/totp/reset" class="mt-3"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="{{template "btn_secondary"}}">Reset authenticator</button></form>
+  {{else}}
+  <p class="mt-1 text-sm text-stone-600">Not set up.</p>
+  <form method="post" action="/admin/users/{{.U.ID}}/totp/start" class="mt-3"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="{{template "btn_secondary"}}">Set up authenticator</button></form>
+  {{end}}
+</section>
+<form method="post" action="/admin/users/{{.U.ID}}/delete" class="mt-12 max-w-lg border-t border-stone-200 pt-6">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="confirm"> Remove this user and their sessions</label>
+  <button class="mt-3 rounded border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50">Delete user</button>
+</form>
+{{end}}
+{{template "admin_foot" .}}
