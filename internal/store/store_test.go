@@ -162,3 +162,47 @@ func TestSetupToken(t *testing.T) {
 		t.Fatal("expired token accepted")
 	}
 }
+
+// Branding columns are added by migrate(), not the CREATE TABLE, so a database
+// created by an older build must gain them on open without losing its rows.
+func TestMigrateAddsBrandingToExistingDB(t *testing.T) {
+	dir := t.TempDir()
+	s, err := store.Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.DB().Exec(`ALTER TABLE sites DROP COLUMN theme`); err != nil {
+		t.Fatal(err)
+	}
+	site := &store.Site{Host: "old.example.com", Upstream: "http://a", Methods: []string{"pin"}, SessionTTL: time.Hour}
+	if _, err := s.DB().Exec(`INSERT INTO sites (host, upstream, methods, session_ttl_seconds, allowlist, require_totp, created_at, updated_at)
+		VALUES (?,?,?,?,'[]',0,0,0)`, site.Host, site.Upstream, "pin", 3600); err != nil {
+		t.Fatal(err)
+	}
+	s.Close()
+
+	s2, err := store.Open(dir)
+	if err != nil {
+		t.Fatalf("reopen after schema drift: %v", err)
+	}
+	defer s2.Close()
+	got, err := s2.SiteByHost("old.example.com")
+	if err != nil || got.Theme != "" {
+		t.Fatalf("got %+v err %v", got, err)
+	}
+	got.Theme, got.Accent, got.LogoURL, got.Heading = "dark", "#2563eb", "https://x/logo.svg", "Acme"
+	if err := s2.UpdateSite(got); err != nil {
+		t.Fatal(err)
+	}
+	again, _ := s2.SiteByHost("old.example.com")
+	if again.Theme != "dark" || again.Accent != "#2563eb" || again.Heading != "Acme" || again.Title() != "Acme" {
+		t.Fatalf("branding round trip: %+v", again)
+	}
+}
+
+func TestSiteTitleFallsBackToHost(t *testing.T) {
+	s := &store.Site{Host: "a.example.com"}
+	if s.Title() != "a.example.com" {
+		t.Fatal("empty heading should fall back to host")
+	}
+}

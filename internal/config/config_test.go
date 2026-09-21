@@ -119,3 +119,31 @@ func TestApplySitesHashesAndKeepsExisting(t *testing.T) {
 		t.Fatal("existing hash not kept or upstream not updated")
 	}
 }
+
+func TestValidateBranding(t *testing.T) {
+	base := func() config.SiteCfg {
+		return config.SiteCfg{Host: "a.example.com", Upstream: "http://a", Methods: []string{"pin"}}
+	}
+	ok := base()
+	ok.Theme, ok.Accent, ok.LogoURL = "dark", "#2563eb", "https://cdn.example.com/l.svg"
+	if err := config.ValidateSite(ok, "vakt.example.com", true, false); err != nil {
+		t.Fatalf("valid branding rejected: %v", err)
+	}
+	blank := base()
+	if err := config.ValidateSite(blank, "vakt.example.com", true, false); err != nil {
+		t.Fatalf("empty branding should be allowed: %v", err)
+	}
+	for name, mutate := range map[string]func(*config.SiteCfg){
+		"unknown theme": func(s *config.SiteCfg) { s.Theme = "neon" },
+		"short accent":  func(s *config.SiteCfg) { s.Accent = "#fff" },
+		"css injection": func(s *config.SiteCfg) { s.Accent = "#fff;}body{display:none" },
+		"non-http logo": func(s *config.SiteCfg) { s.LogoURL = "javascript:alert(1)" },
+		"relative logo": func(s *config.SiteCfg) { s.LogoURL = "/logo.svg" },
+	} {
+		bad := base()
+		mutate(&bad)
+		if err := config.ValidateSite(bad, "vakt.example.com", true, false); err == nil {
+			t.Fatalf("%s should be rejected", name)
+		}
+	}
+}

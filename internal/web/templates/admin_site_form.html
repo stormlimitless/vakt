@@ -27,8 +27,29 @@
   <label class="block"><span class="text-sm font-medium">IP allowlist <span class="text-stone-500">(one CIDR per line, skips login)</span></span><textarea name="allowlist" rows="3" class="{{template "input"}} font-mono text-sm">{{.AllowlistText}}</textarea></label>
   <label class="flex items-center gap-2"><input type="checkbox" name="require_totp" {{if .Site.RequireTOTP}}checked{{end}}> Require an authenticator code for named users</label>
 
+  <fieldset class="space-y-4 border-t border-stone-200 pt-6">
+    <legend class="text-sm font-medium">Login page</legend>
+    <p class="text-xs text-stone-500">How the sign-in page looks to visitors of this site.</p>
+
+    <label class="block"><span class="text-sm font-medium">Theme</span>
+      <select name="theme" class="{{template "input"}}">
+        {{range $.ThemeOptions}}<option value="{{.}}" {{if eq . $.Site.Theme}}selected{{end}}>{{if .}}{{.}}{{else}}light (default){{end}}</option>{{end}}
+      </select></label>
+
+    <label class="block"><span class="text-sm font-medium">Heading <span class="text-stone-500">(defaults to the host)</span></span>
+      <input name="heading" value="{{.Site.Heading}}" placeholder="{{.Site.Host}}" class="{{template "input"}}"></label>
+
+    <label class="block"><span class="text-sm font-medium">Logo URL</span>
+      <input name="logo_url" type="url" value="{{.Site.LogoURL}}" placeholder="https://example.com/logo.svg" class="{{template "input"}}">
+      <span class="mt-1 block text-xs text-stone-500">Served from another origin, so it must be reachable over https.</span></label>
+
+    <label class="block"><span class="text-sm font-medium">Accent colour</span>
+      <input name="accent" value="{{.Site.Accent}}" placeholder="#2563eb" pattern="#[0-9a-fA-F]{6}" class="{{template "input"}} font-mono">
+      <span class="mt-1 block text-xs text-stone-500">Hex, used for the button and focus ring.</span></label>
+  </fieldset>
+
   {{if .Users}}
-  <fieldset class="space-y-2">
+  <fieldset class="space-y-2 border-t border-stone-200 pt-6">
     <legend class="text-sm font-medium">Users allowed on this site</legend>
     {{range .Users}}<label class="flex items-center gap-2"><input type="checkbox" name="users" value="{{.ID}}" {{if index $.Assigned .ID}}checked{{end}}> {{.Username}}</label>{{end}}
   </fieldset>

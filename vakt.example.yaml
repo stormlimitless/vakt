@@ -26,3 +26,9 @@ sites:
     allowlist: ["192.168.1.0/24"]
     session_ttl: 168h   # Go duration
     require_totp: false
+
+    # Login page branding. All optional; also editable in the admin UI.
+    theme: dark              # light (default), dark, midnight, minimal
+    heading: "Acme staging"  # defaults to the host
+    logo_url: https://example.com/logo.svg
+    accent: "#2563eb"

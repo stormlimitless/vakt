@@ -16,6 +16,18 @@ type Site struct {
 	SessionTTL   time.Duration
 	Allowlist    []string
 	RequireTOTP  bool
+	Theme        string
+	LogoURL      string
+	Accent       string
+	Heading      string
+}
+
+// Title is what the login page shows above the form.
+func (s *Site) Title() string {
+	if s.Heading != "" {
+		return s.Heading
+	}
+	return s.Host
 }
 
 func (s *Site) Has(method string) bool {
@@ -27,13 +39,14 @@ func (s *Site) Has(method string) bool {
 	return false
 }
 
-const siteCols = `id, host, upstream, methods, coalesce(pin_hash,''), coalesce(password_hash,''), session_ttl_seconds, allowlist, require_totp`
+const siteCols = `id, host, upstream, methods, coalesce(pin_hash,''), coalesce(password_hash,''), session_ttl_seconds, allowlist, require_totp, theme, logo_url, accent, heading`
 
 func scanSite(row scanner) (*Site, error) {
 	var st Site
 	var methods, allow string
 	var ttl int64
-	if err := row.Scan(&st.ID, &st.Host, &st.Upstream, &methods, &st.PinHash, &st.PasswordHash, &ttl, &allow, &st.RequireTOTP); err != nil {
+	if err := row.Scan(&st.ID, &st.Host, &st.Upstream, &methods, &st.PinHash, &st.PasswordHash, &ttl, &allow, &st.RequireTOTP,
+		&st.Theme, &st.LogoURL, &st.Accent, &st.Heading); err != nil {
 		return nil, err
 	}
 	if methods != "" {
@@ -59,13 +72,15 @@ func (s *Store) UpsertSite(site *Site) error {
 		allow, _ = json.Marshal(site.Allowlist)
 	}
 	now := time.Now().Unix()
-	_, err := s.db.Exec(`INSERT INTO sites (host, upstream, methods, pin_hash, password_hash, session_ttl_seconds, allowlist, require_totp, created_at, updated_at)
-		VALUES (?,?,?,?,?,?,?,?,?,?)
+	_, err := s.db.Exec(`INSERT INTO sites (host, upstream, methods, pin_hash, password_hash, session_ttl_seconds, allowlist, require_totp, theme, logo_url, accent, heading, created_at, updated_at)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 		ON CONFLICT(host) DO UPDATE SET upstream=excluded.upstream, methods=excluded.methods, pin_hash=excluded.pin_hash,
 		password_hash=excluded.password_hash, session_ttl_seconds=excluded.session_ttl_seconds, allowlist=excluded.allowlist,
-		require_totp=excluded.require_totp, updated_at=excluded.updated_at`,
+		require_totp=excluded.require_totp, theme=excluded.theme, logo_url=excluded.logo_url, accent=excluded.accent,
+		heading=excluded.heading, updated_at=excluded.updated_at`,
 		site.Host, site.Upstream, strings.Join(site.Methods, ","), nullIfEmpty(site.PinHash), nullIfEmpty(site.PasswordHash),
-		int64(site.SessionTTL.Seconds()), string(allow), site.RequireTOTP, now, now)
+		int64(site.SessionTTL.Seconds()), string(allow), site.RequireTOTP,
+		site.Theme, site.LogoURL, site.Accent, site.Heading, now, now)
 	if err != nil {
 		return err
 	}
@@ -77,9 +92,11 @@ func (s *Store) UpdateSite(site *Site) error {
 	if len(site.Allowlist) > 0 {
 		allow, _ = json.Marshal(site.Allowlist)
 	}
-	_, err := s.db.Exec(`UPDATE sites SET host=?, upstream=?, methods=?, pin_hash=?, password_hash=?, session_ttl_seconds=?, allowlist=?, require_totp=?, updated_at=? WHERE id=?`,
+	_, err := s.db.Exec(`UPDATE sites SET host=?, upstream=?, methods=?, pin_hash=?, password_hash=?, session_ttl_seconds=?, allowlist=?, require_totp=?,
+		theme=?, logo_url=?, accent=?, heading=?, updated_at=? WHERE id=?`,
 		site.Host, site.Upstream, strings.Join(site.Methods, ","), nullIfEmpty(site.PinHash), nullIfEmpty(site.PasswordHash),
-		int64(site.SessionTTL.Seconds()), string(allow), site.RequireTOTP, time.Now().Unix(), site.ID)
+		int64(site.SessionTTL.Seconds()), string(allow), site.RequireTOTP,
+		site.Theme, site.LogoURL, site.Accent, site.Heading, time.Now().Unix(), site.ID)
 	return err
 }
 

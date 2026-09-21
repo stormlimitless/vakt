@@ -28,7 +28,7 @@ func (a *Admin) sitesList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	counts, _ := a.Store.CountActiveSessions()
-	a.render(w, r, 200, "admin_sites", map[string]any{"Title": "Sites", "Sites": sites, "Counts": counts})
+	a.render(w, r, 200, "admin_sites", map[string]any{"Title": "Sites", "Nav": "sites", "Sites": sites, "Counts": counts})
 }
 
 func (a *Admin) loadSite(r *http.Request) (*store.Site, error) {
@@ -62,8 +62,9 @@ func (a *Admin) renderSiteForm(w http.ResponseWriter, r *http.Request, site *sto
 		}
 	}
 	a.render(w, r, status, "admin_site_form", map[string]any{
-		"Title": "Site", "Site": site, "Users": users, "Assigned": assigned, "Error": errMsg,
+		"Title": "Site", "Nav": "sites", "Site": site, "Users": users, "Assigned": assigned, "Error": errMsg,
 		"TTLHours": int(site.SessionTTL.Hours()), "AllowlistText": strings.Join(site.Allowlist, "\n"),
+		"ThemeOptions": append([]string{""}, config.Themes...),
 	})
 }
 
@@ -82,6 +83,8 @@ func (a *Admin) siteSave(w http.ResponseWriter, r *http.Request) {
 		Methods: r.PostForm["methods"], Pin: r.PostFormValue("pin"), Password: r.PostFormValue("password"),
 		Allowlist: splitLines(r.PostFormValue("allowlist")), SessionTTL: time.Duration(hours) * time.Hour,
 		RequireTOTP: r.PostFormValue("require_totp") == "on",
+		Theme:       r.PostFormValue("theme"), Heading: strings.TrimSpace(r.PostFormValue("heading")),
+		LogoURL: strings.TrimSpace(r.PostFormValue("logo_url")), Accent: strings.TrimSpace(r.PostFormValue("accent")),
 	}
 	pinHash, pwHash := site.PinHash, site.PasswordHash
 	if r.PostFormValue("clear_pin") == "on" {
@@ -107,6 +110,7 @@ func (a *Admin) siteSave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	site.Host, site.Upstream, site.Methods, site.Allowlist, site.SessionTTL, site.RequireTOTP = cfg.Host, cfg.Upstream, cfg.Methods, cfg.Allowlist, cfg.SessionTTL, cfg.RequireTOTP
+	site.Theme, site.Heading, site.LogoURL, site.Accent = cfg.Theme, cfg.Heading, cfg.LogoURL, cfg.Accent
 	site.PinHash, site.PasswordHash = pinHash, pwHash
 	if site.ID == 0 {
 		err = a.Store.UpsertSite(site)

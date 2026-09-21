@@ -1,7 +1,17 @@
-{{define "head"}}<!doctype html>
+{{define "head"}}{{$t := str .Theme}}<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{.Title}} · Vakt</title>
 <link rel="stylesheet" href="/vakt/static/app.css">
+<link rel="stylesheet" href="/vakt/theme.css">
 <script src="/vakt/static/htmx.min.js" defer></script>
-</head><body class="min-h-screen bg-stone-100 text-stone-900">{{end}}
+</head>
+<body class="min-h-screen antialiased {{if eq $t "dark"}}bg-stone-950 text-stone-100{{else if eq $t "midnight"}}bg-slate-950 text-slate-100{{else if eq $t "minimal"}}bg-white text-stone-900{{else}}bg-stone-100 text-stone-900{{end}}">{{end}}
+
 {{define "foot"}}</body></html>{{end}}
+
+{{/* Card, muted text and input styling per theme, used by every visitor-facing page. */}}
+{{define "card"}}{{$t := str .Theme}}{{if eq $t "dark"}}rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-xl{{else if eq $t "midnight"}}rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl{{else if eq $t "minimal"}}p-0{{else}}rounded-2xl border border-stone-200 bg-white p-8 shadow-sm{{end}}{{end}}
+
+{{define "muted"}}{{$t := str .Theme}}{{if eq $t "dark"}}text-stone-400{{else if eq $t "midnight"}}text-slate-400{{else}}text-stone-500{{end}}{{end}}
+
+{{define "field"}}{{$t := str .Theme}}mt-1.5 w-full rounded-lg border px-3 py-2.5 outline-none focus-accent {{if eq $t "dark"}}border-stone-700 bg-stone-950 text-stone-100 placeholder-stone-600{{else if eq $t "midnight"}}border-slate-700 bg-slate-950 text-slate-100 placeholder-slate-600{{else}}border-stone-300 bg-white text-stone-900{{end}}{{end}}

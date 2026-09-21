@@ -45,6 +45,7 @@ func (g *Gateway) renderLogin(w http.ResponseWriter, r *http.Request, site *stor
 	web.Render(w, status, "login", map[string]any{
 		"Title": "Sign in", "Host": site.Host, "Methods": site.Methods,
 		"CSRF": g.csrfToken(w, r), "Next": SafeNext(r.FormValue("next")), "Error": errMsg,
+		"Heading": site.Title(), "Theme": site.Theme, "LogoURL": site.LogoURL,
 	})
 }
 

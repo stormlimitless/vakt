@@ -40,7 +40,7 @@ func (a *Admin) usersList(w http.ResponseWriter, r *http.Request) {
 		_, ok := auth.TOTPEnrolled(a.Cipher, u.TOTPSecretEnc)
 		rows = append(rows, userRow{u, ok})
 	}
-	a.render(w, r, 200, "admin_users", map[string]any{"Title": "Users", "Users": rows})
+	a.render(w, r, 200, "admin_users", map[string]any{"Title": "Users", "Nav": "users", "Users": rows})
 }
 
 func (a *Admin) loadUser(r *http.Request) (*store.User, error) {
@@ -213,7 +213,7 @@ func (a *Admin) totpShow(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("error") != "" {
 		errMsg = "That code didn't match. Try again."
 	}
-	a.render(w, r, 200, "admin_totp", map[string]any{"Title": "Enrol authenticator", "U": u, "Secret": secret,
+	a.render(w, r, 200, "admin_totp", map[string]any{"Title": "Enrol authenticator", "Nav": "users", "U": u, "Secret": secret,
 		"QR": "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes()), "Error": errMsg})
 }
 

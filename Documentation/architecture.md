@@ -33,6 +33,29 @@ SQLite tables: `sites`, `users`, `site_users` (which users may reach which site)
 
 Site logins use the `vakt_session` cookie; the admin interface uses a separate `vakt_admin` cookie so that reaching a protected site never grants admin access and vice versa. Sessions live in SQLite, so a restart does not sign everyone out, and expired rows are purged periodically. Each login rotates the session token.
 
+## Login page branding
+
+Each site carries a `theme` (one of `light`, `dark`, `midnight`, `minimal`), a
+`logo_url`, an `accent` colour and a `heading`, editable in the admin or declared
+in `vakt.yaml`.
+
+The accent colour is served as a small same-origin stylesheet at `/vakt/theme.css`
+rather than an inline `style` attribute, so the Content Security Policy stays at
+`style-src 'self'` — no `'unsafe-inline'`, no per-request nonce. The value is
+re-checked against a hex pattern as it is written, so a stored accent cannot break
+out into arbitrary CSS. `img-src` allows `https:` so a site can point at a logo it
+hosts elsewhere.
+
+The PIN field is one input rather than a box per digit: segmented inputs have to be
+sized to the PIN, which would reveal its length before a single guess is made.
+
+## Schema changes
+
+`store.Open` runs `migrate`, which adds any column in `addedColumns` that the table
+does not already have — SQLite has no `ADD COLUMN IF NOT EXISTS`, so each is checked
+against `pragma_table_info` first. New and existing databases both go through it,
+keeping the column list in one place rather than duplicated in the `CREATE TABLE`.
+
 ## A few deliberate choices
 
 - **Lockout cannot be turned off.** PINs are short by design, so a per-site, per-IP lockout is what actually protects them.

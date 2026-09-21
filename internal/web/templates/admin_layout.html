@@ -3,22 +3,46 @@
 <title>{{.Title}} · Vakt admin</title>
 <link rel="stylesheet" href="/vakt/static/app.css">
 <script src="/vakt/static/htmx.min.js" defer></script>
-</head><body class="min-h-screen bg-stone-100 text-stone-900">
+</head><body class="min-h-screen bg-stone-50 text-stone-900 antialiased">
 {{if .User}}
-<header class="border-b border-stone-200 bg-white">
-  <nav class="mx-auto flex max-w-4xl items-center gap-6 px-6 py-3 text-sm">
-    <a href="/admin/sites" class="font-semibold">Vakt</a>
-    <a href="/admin/sites" class="text-stone-600 hover:text-stone-900">Sites</a>
-    <a href="/admin/users" class="text-stone-600 hover:text-stone-900">Users</a>
-    <a href="/admin/status" class="text-stone-600 hover:text-stone-900">Status</a>
-    <form method="post" action="/admin/logout" class="ml-auto"><input type="hidden" name="csrf" value="{{.CSRF}}"><button class="text-stone-500 hover:text-stone-900">Sign out ({{.User}})</button></form>
-  </nav>
-</header>
+<div class="flex min-h-screen">
+  <aside class="hidden w-56 shrink-0 border-r border-stone-200 bg-white md:block">
+    <div class="flex items-center gap-2 px-5 py-4">
+      <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-900">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="h-4 w-4" aria-hidden="true">
+          <path d="M12 3l7 3v5c0 4.4-3 8.4-7 10-4-1.6-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+      </span>
+      <span class="font-semibold tracking-tight">Vakt</span>
+    </div>
+    <nav class="px-3 py-2 text-sm">
+      <a href="/admin/sites" class="block rounded-lg px-3 py-2 {{if eq (str .Nav) "sites"}}bg-stone-100 font-medium{{else}}text-stone-600 hover:bg-stone-50{{end}}">Sites</a>
+      <a href="/admin/users" class="mt-0.5 block rounded-lg px-3 py-2 {{if eq (str .Nav) "users"}}bg-stone-100 font-medium{{else}}text-stone-600 hover:bg-stone-50{{end}}">Users</a>
+      <a href="/admin/status" class="mt-0.5 block rounded-lg px-3 py-2 {{if eq (str .Nav) "status"}}bg-stone-100 font-medium{{else}}text-stone-600 hover:bg-stone-50{{end}}">Status</a>
+    </nav>
+  </aside>
+
+  <div class="min-w-0 flex-1">
+    <header class="flex items-center gap-4 border-b border-stone-200 bg-white px-6 py-3">
+      <nav class="flex gap-4 text-sm md:hidden">
+        <a href="/admin/sites" class="text-stone-600">Sites</a>
+        <a href="/admin/users" class="text-stone-600">Users</a>
+        <a href="/admin/status" class="text-stone-600">Status</a>
+      </nav>
+      <form method="post" action="/admin/logout" class="ml-auto flex items-center gap-3 text-sm">
+        <span class="text-stone-500">{{.User}}</span>
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <button class="rounded-lg border border-stone-300 px-3 py-1.5 font-medium hover:bg-stone-50">Sign out</button>
+      </form>
+    </header>
 {{end}}
 <main class="mx-auto max-w-4xl px-6 py-10">
-{{if .Error}}<p class="mb-6 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{{.Error}}</p>{{end}}
+{{if .Error}}<p role="alert" class="mb-6 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{{.Error}}</p>{{end}}
 {{end}}
-{{define "admin_foot"}}</main></body></html>{{end}}
-{{define "input"}}mt-1 w-full rounded border border-stone-300 bg-white px-3 py-2{{end}}
-{{define "btn"}}rounded bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700{{end}}
-{{define "btn_secondary"}}rounded border border-stone-300 bg-white px-4 py-2 text-sm font-medium hover:bg-stone-50{{end}}
+
+{{define "admin_foot"}}</main>{{if .User}}</div></div>{{end}}</body></html>{{end}}
+
+{{define "input"}}mt-1.5 w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 outline-none focus:border-stone-900{{end}}
+{{define "btn"}}rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700{{end}}
+{{define "btn_secondary"}}rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium hover:bg-stone-50{{end}}
+{{define "badge"}}rounded-md border border-stone-200 bg-stone-50 px-1.5 py-0.5 text-xs font-medium text-stone-600{{end}}

@@ -75,7 +75,38 @@ func Open(dir string) (*Store, error) {
 		db.Close()
 		return nil, err
 	}
+	if err := migrate(db); err != nil {
+		db.Close()
+		return nil, err
+	}
 	return &Store{db: db}, nil
+}
+
+// Columns added after the first release. SQLite has no ADD COLUMN IF NOT
+// EXISTS, so each one is only applied when the table does not already have it.
+// Both fresh and existing databases go through here, which keeps the column
+// list in one place rather than duplicated in the CREATE TABLE above.
+var addedColumns = []struct{ table, column, ddl string }{
+	{"sites", "theme", "ALTER TABLE sites ADD COLUMN theme TEXT NOT NULL DEFAULT ''"},
+	{"sites", "logo_url", "ALTER TABLE sites ADD COLUMN logo_url TEXT NOT NULL DEFAULT ''"},
+	{"sites", "accent", "ALTER TABLE sites ADD COLUMN accent TEXT NOT NULL DEFAULT ''"},
+	{"sites", "heading", "ALTER TABLE sites ADD COLUMN heading TEXT NOT NULL DEFAULT ''"},
+}
+
+func migrate(db *sql.DB) error {
+	for _, c := range addedColumns {
+		var n int
+		if err := db.QueryRow(`SELECT count(*) FROM pragma_table_info(?) WHERE name=?`, c.table, c.column).Scan(&n); err != nil {
+			return err
+		}
+		if n > 0 {
+			continue
+		}
+		if _, err := db.Exec(c.ddl); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Store) DB() *sql.DB  { return s.db }

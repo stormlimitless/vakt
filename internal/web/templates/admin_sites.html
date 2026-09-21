@@ -1,19 +1,34 @@
 {{template "admin_head" .}}
-<div class="flex items-center justify-between">
-  <h1 class="text-2xl font-semibold">Sites</h1>
+<div class="flex items-start justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight">Sites</h1>
+    <p class="mt-1 text-sm text-stone-500">Hosts Vakt puts a login in front of.</p>
+  </div>
   <a href="/admin/sites/new" class="{{template "btn"}}">Add site</a>
 </div>
-<table class="mt-6 w-full text-sm">
-  <thead class="text-left text-stone-500"><tr><th class="py-2">Host</th><th>Upstream</th><th>Methods</th><th>Sessions</th></tr></thead>
-  <tbody>
-  {{range .Sites}}
-  <tr class="border-t border-stone-200">
-    <td class="py-2"><a href="/admin/sites/{{.ID}}" class="font-medium underline">{{.Host}}</a></td>
-    <td class="text-stone-600">{{.Upstream}}</td>
-    <td>{{range .Methods}}<span class="mr-1 rounded bg-stone-200 px-1.5 py-0.5 text-xs">{{.}}</span>{{end}}</td>
-    <td>{{index $.Counts .ID}}</td>
-  </tr>
-  {{else}}<tr><td colspan="4" class="py-6 text-stone-500">No sites yet.</td></tr>{{end}}
-  </tbody>
-</table>
+
+<div class="mt-6 overflow-hidden rounded-xl border border-stone-200 bg-white">
+  <table class="w-full text-sm">
+    <thead class="border-b border-stone-200 bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500">
+      <tr><th class="px-4 py-2.5 font-medium">Host</th><th class="px-4 py-2.5 font-medium">Upstream</th>
+          <th class="px-4 py-2.5 font-medium">Login</th><th class="px-4 py-2.5 font-medium text-right">Sessions</th></tr>
+    </thead>
+    <tbody>
+    {{range .Sites}}
+    <tr class="border-b border-stone-100 last:border-0 hover:bg-stone-50">
+      <td class="px-4 py-3">
+        <a href="/admin/sites/{{.ID}}" class="font-medium hover:underline">{{.Host}}</a>
+        {{if or .Accent .LogoURL .Theme}}<span class="ml-2 {{template "badge"}}">branded</span>{{end}}
+      </td>
+      <td class="px-4 py-3 font-mono text-xs text-stone-600">{{.Upstream}}</td>
+      <td class="px-4 py-3">{{range .Methods}}<span class="mr-1 {{template "badge"}}">{{.}}</span>{{end}}</td>
+      <td class="px-4 py-3 text-right tabular-nums text-stone-600">{{index $.Counts .ID}}</td>
+    </tr>
+    {{else}}
+    <tr><td colspan="4" class="px-4 py-10 text-center text-stone-500">
+      No sites yet. <a href="/admin/sites/new" class="underline">Add the first one.</a></td></tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
 {{template "admin_foot" .}}

@@ -1,30 +1,56 @@
 {{template "head" .}}
-<main class="mx-auto max-w-sm px-6 py-24">
-  <p class="text-xs uppercase tracking-widest text-stone-500">Protected by Vakt</p>
-  <h1 class="mt-2 text-2xl font-semibold">{{.Host}}</h1>
-  {{if .Error}}<p class="mt-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{{.Error}}</p>{{end}}
-  <form method="post" action="/vakt/login" class="mt-8 space-y-6">
-    <input type="hidden" name="csrf" value="{{.CSRF}}">
-    <input type="hidden" name="next" value="{{.Next}}">
-    {{range .Methods}}
-      {{if eq . "pin"}}
-      <label class="block"><span class="text-sm font-medium">PIN code</span>
-        <input name="pin" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" class="mt-1 w-full rounded border border-stone-300 px-3 py-2 text-lg tracking-[0.4em]"></label>
-      {{else if eq . "password"}}
-      <label class="block"><span class="text-sm font-medium">Password</span>
-        <input name="password" type="password" autocomplete="current-password" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
-      {{else if eq . "users"}}
-      <fieldset class="space-y-3">
-        <label class="block"><span class="text-sm font-medium">Username</span>
-          <input name="username" autocomplete="username" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
-        <label class="block"><span class="text-sm font-medium">Password</span>
-          <input name="user_password" type="password" autocomplete="current-password" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
-        <label class="block"><span class="text-sm font-medium">Authenticator code <span class="text-stone-500">(if enabled)</span></span>
-          <input name="totp" inputmode="numeric" autocomplete="one-time-code" class="mt-1 w-full rounded border border-stone-300 px-3 py-2"></label>
-      </fieldset>
+<main class="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+  <div class="w-full max-w-sm">
+    <div class="{{template "card" .}}">
+      {{if .LogoURL}}
+      <img src="{{.LogoURL}}" alt="" class="mb-6 h-10 w-auto">
+      {{else}}
+      <div class="mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="h-5 w-5" aria-hidden="true">
+          <path d="M12 3l7 3v5c0 4.4-3 8.4-7 10-4-1.6-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
       {{end}}
-    {{end}}
-    <button class="w-full rounded bg-stone-900 px-4 py-2 font-medium text-white hover:bg-stone-700">Continue</button>
-  </form>
+
+      <h1 class="text-xl font-semibold tracking-tight">{{if .Heading}}{{.Heading}}{{else}}{{.Host}}{{end}}</h1>
+      <p class="mt-1 text-sm {{template "muted" .}}">Sign in to continue.</p>
+
+      {{if .Error}}
+      <p role="alert" class="mt-5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{{.Error}}</p>
+      {{end}}
+
+      <form method="post" action="/vakt/login" class="mt-6 space-y-5">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <input type="hidden" name="next" value="{{.Next}}">
+        {{range .Methods}}
+          {{if eq . "pin"}}
+          <label class="block"><span class="text-sm font-medium">PIN code</span>
+            {{/* One field rather than per-digit boxes: segmented inputs would
+                 reveal how long the PIN is before a single guess is made. */}}
+            <input name="pin" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autofocus
+                   class="{{template "field" $}} text-center text-2xl pin-field"></label>
+          {{else if eq . "password"}}
+          <label class="block"><span class="text-sm font-medium">Password</span>
+            <input name="password" type="password" autocomplete="current-password" class="{{template "field" $}}"></label>
+          {{else if eq . "users"}}
+          <fieldset class="space-y-4">
+            <label class="block"><span class="text-sm font-medium">Username</span>
+              <input name="username" autocomplete="username" class="{{template "field" $}}"></label>
+            <label class="block"><span class="text-sm font-medium">Password</span>
+              <input name="user_password" type="password" autocomplete="current-password" class="{{template "field" $}}"></label>
+            <label class="block"><span class="text-sm font-medium">Authenticator code <span class="{{template "muted" $}}">(if enabled)</span></span>
+              <input name="totp" inputmode="numeric" autocomplete="one-time-code" class="{{template "field" $}}"></label>
+          </fieldset>
+          {{end}}
+        {{end}}
+        <button class="w-full rounded-lg bg-accent px-4 py-2.5 font-medium text-white transition hover:brightness-110">Continue</button>
+      </form>
+    </div>
+
+    <p class="mt-6 text-center text-xs {{template "muted" .}}">
+      <a href="https://github.com/stormlimitless/vakt" target="_blank" rel="noopener noreferrer"
+         class="underline-offset-4 hover:underline">Protected by Vakt</a>
+    </p>
+  </div>
 </main>
 {{template "foot" .}}

@@ -1,2 +1,21 @@
 @import "tailwindcss";
 @source "../templates";
+
+/* --accent is set per site by /vakt/theme.css. Applying the colour through a
+   stylesheet instead of a style attribute keeps the CSP at style-src 'self'. */
+.bg-accent {
+  background-color: var(--accent, #1c1917);
+}
+.text-accent {
+  color: var(--accent, #1c1917);
+}
+/* Spread the PIN digits out. Written by hand because the arbitrary-value form
+   (tracking-[0.5em]) is not picked up by the scanner here and silently no-ops. */
+.pin-field {
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+}
+.focus-accent:focus {
+  border-color: var(--accent, #1c1917);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #1c1917) 25%, transparent);
+}

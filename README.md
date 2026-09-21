@@ -45,6 +45,7 @@ Sites listed in `vakt.yaml` are applied on every start; the admin UI edits the s
 
 - PIN code, shared password, or named users per site — in any combination
 - Optional TOTP (authenticator app) for named users
+- Per-site login page branding — theme preset, logo, accent colour, heading
 - Per-site IP allowlist that skips the login
 - Brute-force lockout per site and IP
 - Automatic HTTPS via Let's Encrypt, or bring your own certificate

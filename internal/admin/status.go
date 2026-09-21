@@ -14,5 +14,5 @@ func (a *Admin) status(w http.ResponseWriter, r *http.Request) {
 	for _, s := range sites {
 		hosts[s.ID] = s.Host
 	}
-	a.render(w, r, 200, "admin_status", map[string]any{"Title": "Status", "Sites": sites, "Counts": counts, "Locked": locked, "Hosts": hosts})
+	a.render(w, r, 200, "admin_status", map[string]any{"Title": "Status", "Nav": "status", "Sites": sites, "Counts": counts, "Locked": locked, "Hosts": hosts})
 }

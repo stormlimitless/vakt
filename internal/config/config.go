@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -37,6 +38,27 @@ type SiteCfg struct {
 	Allowlist   []string      `yaml:"allowlist"`
 	SessionTTL  time.Duration `yaml:"session_ttl"`
 	RequireTOTP bool          `yaml:"require_totp"`
+	Theme       string        `yaml:"theme"`
+	LogoURL     string        `yaml:"logo_url"`
+	Accent      string        `yaml:"accent"`
+	Heading     string        `yaml:"heading"`
+}
+
+// Themes are the login page presets. The empty value means "light".
+var Themes = []string{"light", "dark", "midnight", "minimal"}
+
+var accentRe = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+
+func validTheme(t string) bool {
+	if t == "" {
+		return true
+	}
+	for _, v := range Themes {
+		if v == t {
+			return true
+		}
+	}
+	return false
 }
 
 type Config struct {
@@ -180,6 +202,18 @@ func ValidateSite(s SiteCfg, adminHost string, hasPin, hasPassword bool) error {
 			return fmt.Errorf("site %s: allowlist: %w", s.Host, err)
 		}
 	}
+	if !validTheme(s.Theme) {
+		return fmt.Errorf("site %s: theme %q must be one of %s", s.Host, s.Theme, strings.Join(Themes, ", "))
+	}
+	if s.Accent != "" && !accentRe.MatchString(s.Accent) {
+		return fmt.Errorf("site %s: accent must be a hex colour like #2563eb", s.Host)
+	}
+	if s.LogoURL != "" {
+		u, err := url.Parse(s.LogoURL)
+		if err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+			return fmt.Errorf("site %s: logo_url must be an http(s) URL", s.Host)
+		}
+	}
 	return nil
 }
 
@@ -200,7 +234,8 @@ func validPin(p string) bool {
 // sets; an empty pin/password keeps whatever hash the store already has.
 func (c Config) ApplySites(st *store.Store) error {
 	for _, s := range c.Sites {
-		site := &store.Site{Host: s.Host, Upstream: s.Upstream, Methods: s.Methods, Allowlist: s.Allowlist, SessionTTL: s.SessionTTL, RequireTOTP: s.RequireTOTP}
+		site := &store.Site{Host: s.Host, Upstream: s.Upstream, Methods: s.Methods, Allowlist: s.Allowlist, SessionTTL: s.SessionTTL, RequireTOTP: s.RequireTOTP,
+			Theme: s.Theme, LogoURL: s.LogoURL, Accent: s.Accent, Heading: s.Heading}
 		if site.SessionTTL == 0 {
 			site.SessionTTL = DefaultSessionTTL
 		}

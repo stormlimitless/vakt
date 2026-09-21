@@ -94,6 +94,8 @@ func (g *Gateway) serveOwn(w http.ResponseWriter, r *http.Request) {
 		g.login(w, r, site)
 	case "/vakt/logout":
 		g.logout(w, r)
+	case "/vakt/theme.css":
+		web.ThemeCSS(w, site.Accent)
 	default:
 		http.NotFound(w, r)
 	}
