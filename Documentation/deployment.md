@@ -15,6 +15,31 @@ services:
 
 `docker compose up -d`, then read the setup URL from `docker compose logs vakt` and open it within the hour to create the first admin.
 
+## From a release binary
+
+Vakt is one static binary, so Docker is optional. Each tagged release publishes
+`vakt_<version>_linux_<arch>.tar.gz` plus `checksums.txt`:
+
+```sh
+curl -fsSLO https://github.com/stormlimitless/vakt/releases/latest/download/vakt_0.1.0_linux_amd64.tar.gz
+tar -xzf vakt_0.1.0_linux_amd64.tar.gz
+sudo install -m 755 vakt /usr/local/bin/vakt
+```
+
+Run it under systemd as an unprivileged user with its own data directory:
+
+```ini
+[Service]
+User=vakt
+Environment=VAKT_CONFIG=/etc/vakt/vakt.yaml
+ExecStart=/usr/local/bin/vakt
+Restart=on-failure
+```
+
+Binding ports 80 and 443 as a non-root user needs
+`AmbientCapabilities=CAP_NET_BIND_SERVICE`; behind a proxy that terminates TLS,
+listen on a high port instead and skip it.
+
 ## DNS
 
 Point the admin host and every protected site's host at the server's address. Vakt routes purely on the `Host` header, so each protected site is just another name resolving to the same Vakt instance.
