@@ -45,6 +45,7 @@ type Config struct {
 	ListenHTTP     string     `yaml:"listen_http"`
 	ListenHTTPS    string     `yaml:"listen_https"`
 	TLS            TLS        `yaml:"tls"`
+	SecureCookies  *bool      `yaml:"secure_cookies"`
 	TrustedProxies []string   `yaml:"trusted_proxies"`
 	Lockout        LockoutCfg `yaml:"lockout"`
 	Sites          []SiteCfg  `yaml:"sites"`
@@ -95,6 +96,20 @@ func (c *Config) ApplyEnv(getenv func(string) string) {
 	set(&c.ListenHTTPS, "VAKT_LISTEN_HTTPS")
 	set(&c.TLS.Mode, "VAKT_TLS_MODE")
 	set(&c.TLS.Email, "VAKT_TLS_EMAIL")
+	if v := getenv("VAKT_SECURE_COOKIES"); v != "" {
+		b := v == "1" || strings.EqualFold(v, "true") || strings.EqualFold(v, "yes")
+		c.SecureCookies = &b
+	}
+}
+
+// CookiesSecure reports whether session cookies carry the Secure attribute.
+// It follows whether Vakt terminates TLS itself, unless secure_cookies says
+// otherwise — which is what a TLS-terminating proxy in front needs.
+func (c Config) CookiesSecure() bool {
+	if c.SecureCookies != nil {
+		return *c.SecureCookies
+	}
+	return c.TLS.Mode != "off"
 }
 
 func (c Config) Validate() error {

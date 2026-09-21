@@ -33,6 +33,8 @@ Autocert only requests certificates for the hosts known at startup — the admin
 
 If Vakt sits behind a load balancer or Cloudflare, list the proxy's networks in `trusted_proxies` (CIDRs). Vakt then trusts `X-Forwarded-For` from those sources to determine the real client IP for allowlists and lockout. Without this, `X-Forwarded-For` is ignored and the direct peer is used.
 
+When that proxy also terminates TLS, Vakt runs with `tls.mode: off` but visitors still arrive over HTTPS. Set `secure_cookies: true` (or `VAKT_SECURE_COOKIES=true`) so session cookies keep the `Secure` attribute — otherwise it is derived from `tls.mode` and would be dropped.
+
 ## Config vs. the admin UI
 
 Anything in `vakt.yaml` is re-applied to the store on every start. If you set a site's PIN in the config and later change it in the admin UI, the config value wins again after a restart. Use the config file for a fully declarative deployment, or the admin UI for day-to-day changes — but not both for the same field.

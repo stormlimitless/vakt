@@ -47,6 +47,27 @@ func TestLoadAndEnv(t *testing.T) {
 	}
 }
 
+func TestCookiesSecure(t *testing.T) {
+	c := config.Default()
+	if c.CookiesSecure() {
+		t.Fatal("tls off should default to insecure cookies")
+	}
+	c.TLS.Mode = "autocert"
+	if !c.CookiesSecure() {
+		t.Fatal("tls on should default to secure cookies")
+	}
+	c.TLS.Mode = "off"
+	c.ApplyEnv(func(k string) string {
+		if k == "VAKT_SECURE_COOKIES" {
+			return "true"
+		}
+		return ""
+	})
+	if !c.CookiesSecure() {
+		t.Fatal("VAKT_SECURE_COOKIES should force secure cookies behind a tls terminator")
+	}
+}
+
 func TestValidate(t *testing.T) {
 	c := config.Default()
 	c.AdminHost = "vakt.example.com"

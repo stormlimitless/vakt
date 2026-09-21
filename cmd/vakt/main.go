@@ -61,7 +61,7 @@ func run(cfgPath string) error {
 	sessions := &auth.Sessions{Store: st}
 	lockout := &auth.Lockout{Store: st, MaxAttempts: cfg.Lockout.MaxAttempts, Duration: time.Duration(cfg.Lockout.Minutes) * time.Minute}
 	trusted := proxy.ParseCIDRs(cfg.TrustedProxies)
-	secure := cfg.TLS.Mode != "off"
+	secure := cfg.CookiesSecure()
 
 	adm := &admin.Admin{Store: st, Sessions: sessions, Lockout: lockout, Cipher: cipher, Trusted: trusted, Secure: secure, Version: version}
 	gw := &proxy.Gateway{Store: st, Sessions: sessions, Lockout: lockout, Cipher: cipher, Trusted: trusted, Secure: secure, Admin: adm.Handler(), AdminHost: cfg.AdminHost}

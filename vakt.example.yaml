@@ -7,6 +7,10 @@ tls:
   mode: autocert
   email: you@example.com
 
+# Set true when a TLS-terminating proxy sits in front and tls.mode is off,
+# so session cookies keep the Secure attribute. Defaults to tls.mode != off.
+# secure_cookies: true
+
 # CIDRs whose X-Forwarded-For header Vakt should trust (e.g. your load balancer).
 trusted_proxies: []
 
